@@ -1,21 +1,10 @@
 ---
-- name: epel install
-  copy:
-    src: epel-release-6-8.noarch.rpm
+- name: copy supervisor file
+  unarchive:
+    src: supervisor-3.3.1.tar.gz
     dest: /usr/local/src/
-  #  checksum: yes
 
-- name: install epel
-  command: rpm -ivh epel-release-6-8.noarch.rpm
+- name: install supervisor
+  command: python setup.py install
   args:
-    chdir: /usr/local/src
-    creates: /etc/yum.repos.d/epel.repo
-  ignore_errors: True
-
-- name: clean
-  command: yum clean all
-  
-- name: yum install supervisor
-  yum:
-    name: supervisor
-    state: installed
+    chdir: /usr/local/src/supervisor-3.3.1
