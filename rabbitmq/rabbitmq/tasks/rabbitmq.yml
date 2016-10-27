@@ -1,0 +1,77 @@
+- name: create data log path
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - /data/rabbitmq/data
+    - /data/rabbitmq/log
+
+- name: install erlang copy"
+  copy: 
+    src: erlang-17.4-1.el6.x86_64.rpm
+    dest: /usr/local/src/
+
+- name: install erlang install
+  yum:
+    name: /usr/local/src/erlang-17.4-1.el6.x86_64.rpm
+    state: installed
+
+- name: install erlang absent rpm
+  file: 
+    path: /usr/local/src/erlang-17.4-1.el6.x86_64.rpm
+    state: absent
+
+- name: copy rabbitmq
+  unarchive:
+    src: "{{ rabbitmq }}.tar.gz"
+    dest: /usr/local/
+
+- name: template rabbitmq.config
+  template:
+    src: rabbitmq.config.j2
+    dest: /usr/local/rabbitmq/etc/rabbitmq/rabbitmq.config
+
+- name: template rabbitmq-env
+  template:
+    src: rabbitmq-env.conf.j2
+    dest: /usr/local/rabbitmq/etc/rabbitmq/rabbitmq-env.conf
+
+- name: copy /etc/init.d/rabbitmq-server
+  copy:
+    src: rabbitmq-server
+    dest: /etc/init.d/
+    mode: 0755
+
+- name: start rabbitmq and enable
+  service:
+    name: rabbitmq-server
+    state: started
+    enabled: yes
+
+- name: link command
+  file:
+    src: /usr/local/rabbitmq/sbin/{{ item }}
+    dest: /usr/local/sbin/{{ item }}
+    state: link
+  with_items:
+    - rabbitmqctl
+    - rabbitmq-server
+    - rabbitmq-env
+    - rabbitmq-defaults
+    - rabbitmq-plugins
+
+- name: rabbitmq management plugin
+  rabbitmq_plugin:
+    names: rabbitmq_management
+    state: enabled
+
+- name: add user
+  rabbitmq_user:
+    user: "{{ user }}"
+    password: "{{ password }}"
+    vhost: /
+    configure_priv: .*
+    read_priv: .*
+    write_priv: .*
+    tags: administrator
+    state: present

@@ -1,0 +1,56 @@
+- name: add group mysql
+  group:
+    name: mysql
+    state: present
+
+- name: add user mysql
+  user:
+    name: mysql
+    shell: /sbin/nologin
+    group: mysql
+
+- name: create path /data/
+  file:
+    path: /data
+    state: directory
+
+- name: unarchive mysql file
+  unarchive:
+    src: "{{ mysql }}.tar.gz"
+    dest: /usr/local/
+
+- name: unarchive mysql file
+  unarchive:
+    src: mysql.tar.gz
+    dest: /data/
+
+- name: copy my.cnf
+  template:
+    src: my-medium.cnf.j2
+    dest: /etc/my.cnf
+
+- name: copy /etc/init.d/mysql
+  copy:
+    src: mysql.server
+    dest: /etc/init.d/mysql
+    mode: 0755
+
+- name: copy /etc/ld.so.conf.d/mysql.conf
+  copy:
+    src: mysql.conf
+    dest: /etc/ld.so.conf.d/mysql.conf
+
+- name: ldconfig
+  shell: ldconfig
+
+- name: link command mysql
+  file:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    state: link
+  with_items:
+    - { src: '/usr/local/mysql/bin/mysql', dest: '/usr/bin/mysql' }
+    - { src: '/usr/local/mysql/bin/mysqldump', dest: '/usr/bin/mysqldump' }
+    - { src: '/usr/local/mysql/bin/myisamchk', dest: '/usr/bin/myisamchk' }
+    - { src: '/usr/local/mysql/bin/mysqld_safe', dest: '/usr/bin/mysqld_safe' }
+    - { src: '/usr/local/mysql/bin/mysqladmin', dest: '/usr/bin/mysqladmin' }

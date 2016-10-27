@@ -1,0 +1,2 @@
+- include: nginxinstall.yml
+- include: nginxstart.yml

@@ -1,0 +1,83 @@
+- name: create path data
+  file:
+    path: /data/redis
+    state: directory
+  tags:
+    - install_redis+add_port
+
+- name: create path log
+  file:
+    path: /data/log
+    state: directory
+  tags:
+    - install_redis+add_port
+
+- name: copy redis file
+  unarchive:
+    src: "{{ redis }}.tar.gz"
+    dest: /usr/local/
+  tags:
+    - install_redis+add_port
+ 
+- name: link redis file
+  file:
+    src: "/usr/local/{{ redis }}"
+    dest: /data/redis
+    force: yes
+    state: link
+  tags:
+    - install_redis+add_port
+
+- name: copy command
+  copy:
+    src: "{{ redis }}-{{ item }}"
+    dest: /usr/local/bin/{{ item }}
+    mode: 0755
+  with_items:
+    - redis-benchmark
+    - redis-check-aof
+    - redis-check-dump
+    - redis-cli
+    - redis-server
+  tags:
+    - install_redis+add_port
+
+- name: link redis-sentinel
+  file:
+    src: redis-server
+    dest: /usr/local/bin/redis-sentinel
+    state: link
+  tags:
+    - install_redis+add_port
+
+- name: "create path /data/nosql/redis/{{ port }}"
+  file:
+    path: /data/nosql/redis/{{ port }}
+    state: directory
+  tags:
+    - install_redis+add_port
+    - add_port
+
+- name: create path /etc/redis
+  file: 
+    path: /etc/redis
+    state: directory
+  tags:
+    - install_redis+add_port
+
+- name: copy conf
+  template:
+    src: redis.conf.j2
+    dest: /etc/redis/{{ port }}.conf
+  tags:
+    - install_redis+add_port
+    - add_port
+
+- name: "copy /etc/init.d/redis_{{ port }}"
+  template:
+    src: redis_init_script.j2
+    dest: /etc/init.d/redis_{{ port }}
+    mode: 0755
+  tags:
+    - install_redis+add_port
+    - add_port

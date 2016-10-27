@@ -1,0 +1,7 @@
+---
+- hosts: "{{ hosts }}"
+  
+  vars_files:
+    - redis/vars_files/vars_{{ vars_files }}.yml
+  roles:
+    - role: redis

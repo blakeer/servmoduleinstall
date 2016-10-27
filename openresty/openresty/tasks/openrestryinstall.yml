@@ -1,0 +1,21 @@
+- name: create path webserver
+  file:
+    path: /data/webserver
+    state: directory
+
+- name: unarchive openrest.tar.gz
+  unarchive:
+    src: openresty.tar.gz
+    dest: /data/webserver/
+
+- name: copy command 
+  copy:
+    src: luajit-2.1.0-beta1
+    dest: /usr/local/bin/
+    mode: 0755
+
+- name: link command luajit
+  file:
+    src: /usr/local/bin/luajit-2.1.0-beta1
+    dest: /usr/bin/luajit
+    state: link

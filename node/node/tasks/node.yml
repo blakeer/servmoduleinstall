@@ -1,0 +1,19 @@
+- name: copy node file
+  unarchive:
+    src: node-v6.9.0-linux-x64.tar.gz
+    dest: /usr/local/
+    owner: root
+
+- name: link node
+  file:
+    src: /usr/local/node-v6.9.0-linux-x64 
+    dest: /usr/local/node
+    state: link
+    force: yes
+
+- name: add profile
+  lineinfile:
+    dest: /etc/profile
+    line: "{{ item }}"
+  with_items:
+    - "{{ profile }}"

@@ -1,0 +1,2 @@
+- include: redisinstall.yml
+- include: redistart.yml

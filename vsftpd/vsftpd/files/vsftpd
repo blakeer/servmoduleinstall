@@ -1,0 +1,2 @@
+auth    sufficient      /lib64/security/pam_userdb.so     db=/etc/vsftpd/virtusers
+account sufficient      /lib64/security/pam_userdb.so     db=/etc/vsftpd/virtusers

@@ -1,0 +1,79 @@
+- name: create path
+  raw: mkdir /data/webserver /data/log/php -p
+
+- name: add group nginx
+  group:
+    name: nginx
+    state: present
+
+- name: add user nginx
+  user:
+    name: nginx
+    shell: /bin/bash
+    group: nginx
+
+- name: copy php file
+  copy:
+    src: php5.6.3.tar.gz
+    dest: /data/webserver/
+
+- name: unzip php file
+  raw: tar zxvf /data/webserver/php5.6.3.tar.gz -C /data/webserver
+
+- name: link command php
+  file:
+    src: /data/webserver/php/bin/php
+    dest: /usr/bin/php 
+    state: link
+
+- name: link command phpize
+  file:
+    src: /data/webserver/php/bin/phpize
+    dest: /usr/bin/phpize 
+    state: link
+
+- name: link command php-fpm
+  file:
+    src: /data/webserver/php/sbin/php-fpm
+    dest: /usr/bin/php-fpm
+    state: link
+
+- name: copy /etc/init.d/php-fpm
+  copy:
+    src: php-fpm
+    dest: /etc/init.d/
+    mode: 0755
+
+- name: copy lib file
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: 0755
+  with_items:
+    - { src: 'charset.alias', dest: '/usr/local/lib/charset.alias' }
+    - { src: 'libcharset.a', dest: '/usr/local/lib/libcharset.a' }
+    - { src: 'libcharset.la', dest: '/usr/local/lib/libcharset.la' }
+    - { src: 'libcharset.so.1.0.0', dest: '/usr/local/lib/libcharset.so.1.0.0' }
+    - { src: 'libiconv.la', dest: '/usr/local/lib/libiconv.la' }
+    - { src: 'libiconv.so.2.5.1', dest: '/usr/local/lib/libiconv.so.2.5.1' }
+    - { src: 'preloadable_libiconv.so', dest: '/usr/local/lib/preloadable_libiconv.so' }
+    - { src: 'libmcrypt.so.4.4.8', dest: '/usr/local/lib/libmcrypt.so.4.4.8' }
+    - { src: 'libexslt.so.0.8.15', dest: '/usr/local/lib/libexslt.so.0.8.15' }
+    - { src: 'libxslt.so.1.1.26', dest: '/usr/local/lib/libxslt.so.1.1.26' }
+
+- name: link lib file
+  file:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    state: link
+  with_items:
+    - { src: 'libcharset.so.1.0.0', dest: '/usr/local/lib/libcharset.so' }
+    - { src: 'libcharset.so.1.0.0', dest: '/usr/local/lib/libcharset.so.1' }
+    - { src: 'libiconv.so.2.5.1', dest: '/usr/local/lib/libiconv.so' }
+    - { src: 'libiconv.so.2.5.1', dest: '/usr/local/lib/libiconv.so.2' }
+    - { src: 'libmcrypt.so.4.4.8', dest: '/usr/local/lib/libmcrypt.so.4' }
+    - { src: 'libexslt.so.0.8.15', dest: '/usr/local/lib/libexslt.so.0' }
+    - { src: 'libxslt.so.1.1.26', dest: '/usr/local/lib/libxslt.so.1' }
+    
+- name: delete php file
+  raw: rm -rf /data/webserver/php5*

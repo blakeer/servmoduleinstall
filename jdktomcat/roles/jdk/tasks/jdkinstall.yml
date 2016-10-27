@@ -1,0 +1,19 @@
+- name: create directory
+  file:
+    path: /data/webserver
+    state: directory
+
+- name: copy jdk
+  copy:
+    src: "{{jdk}}"
+    dest: /data/webserver/{{jdk}}.rpm
+
+- name: install jdk
+  yum:
+    name: /data/webserver/{{jdk}}.rpm
+    state: present
+
+- name: delete file
+  file:
+    path: /data/webserver/{{jdk}}.rpm
+    state: absent

@@ -1,0 +1,2 @@
+- name: start openresty nginx
+  shell: /data/webserver/openresty/nginx/sbin/nginx

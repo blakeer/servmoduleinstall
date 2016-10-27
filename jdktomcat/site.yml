@@ -1,0 +1,10 @@
+---
+- hosts: "{{ hosts }}"
+  gather_facts: false
+  roles:
+    - role: jdk
+      tags:
+        - JDK
+    - role: tomcat
+      tags:
+        - TOMCAT

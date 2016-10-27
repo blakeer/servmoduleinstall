@@ -1,0 +1,9 @@
+- name: create path webserver
+  file:
+    path: /data/webserver
+    state: directory
+
+- name: copy libmemcached file
+  unarchive:
+    src: libmemcached.tar.gz
+    dest: /usr/local/

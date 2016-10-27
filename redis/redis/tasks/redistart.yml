@@ -1,0 +1,7 @@
+- name: "start redis_{{ port }}"
+  service:
+    name: redis_{{ port }}
+    state: started
+  tags:
+    - install_redis+add_port
+    - add_port

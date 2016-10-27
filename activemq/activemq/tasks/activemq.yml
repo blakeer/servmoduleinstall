@@ -1,0 +1,31 @@
+- name: create path data
+  file:
+    path: /data
+    state: directory
+
+- name: copy activemq file
+  unarchive:
+    src: apache-{{ activemq }}-bin.tar.gz
+    dest: /data/
+
+- name: rename
+  shell: mv /data/apache-{{ activemq }} /data/activemq
+
+- name: change port
+  template:
+    src: "{{ activemq }}.xml.j2"
+    dest: /data/activemq/conf/activemq.xml
+
+
+- name: change web port
+  template:
+    src: "{{ activemq }}.jetty.xml.j2"  
+    dest: /data/activemq/conf/jetty.xml
+
+- name: change username password
+  template:
+    src: jetty-realm.properties.j2  
+    dest: /data/activemq/conf/jetty-realm.properties
+
+- name: start activemq
+  shell: nohup /data/activemq/bin/activemq start &

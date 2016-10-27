@@ -1,0 +1,7 @@
+---
+  - hosts: cloudtv-web-08
+    gather_facts: false
+
+    tasks: 
+      - name: uptime 
+        command: uptime

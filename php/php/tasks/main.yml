@@ -1,0 +1,2 @@
+- include: phpinstall.yml
+- include: phpstart.yml

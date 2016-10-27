@@ -1,0 +1,21 @@
+---
+- name: epel install
+  copy:
+    src: epel-release-6-8.noarch.rpm
+    dest: /usr/local/src/
+  #  checksum: yes
+
+- name: install epel
+  command: rpm -ivh epel-release-6-8.noarch.rpm
+  args:
+    chdir: /usr/local/src
+    creates: /etc/yum.repos.d/epel.repo
+  ignore_errors: True
+
+- name: clean
+  command: yum clean all
+  
+- name: yum install supervisor
+  yum:
+    name: supervisor
+    state: installed

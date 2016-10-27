@@ -1,0 +1,7 @@
+- name: "yum install packages: {{ yum_packages }}"
+  yum:
+    name: "{{ yum_packages }}"
+    state: installed
+  ignore_errors: True
+  tags:
+    - INSTALL

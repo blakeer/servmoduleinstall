@@ -1,0 +1,113 @@
+- copy:
+    src: vsftpd-2.2.2-21.el6.x86_64.rpm
+    dest: /usr/local/src
+  tags:
+    - install_vsftpd+add_virtuser
+
+- name: install vsftpd
+  shell: rpm -i /usr/local/src/vsftpd-2.2.2-21.el6.x86_64.rpm
+  ignore_errors: True
+  tags:
+    - install_vsftpd+add_virtuser
+
+- name: set vsftpd.conf
+  template:
+    src: vsftpd.conf
+    dest: /etc/vsftpd/vsftpd.conf
+  tags:
+    - install_vsftpd+add_virtuser
+
+- copy:
+    src: chroot_list
+    dest: /etc/vsftpd/chroot_list
+  tags:
+    - install_vsftpd+add_virtuser
+
+- name: add userftp
+  user:
+    name: userftp
+    group: ftp
+    shell: /sbin/nologin
+  tags:
+    - install_vsftpd+add_virtuser
+ 
+- name: set virtusers.txt
+  template:
+    src: virtusers.txt.j2
+    dest: /etc/vsftpd/virtusers.txt
+  tags:
+    - install_vsftpd+add_virtuser
+
+#- lineinfile:
+#    dest: /etc/vsftpd/virtusers.txt
+#    state: present
+#    regexp: "^{{ user }}$"
+#    line: "{{ user }}\n{{ password }}"
+#  tags:
+#    - add_virtuser
+
+- name: add virtuser
+  shell: echo "{{ user }}" >> /etc/vsftpd/virtusers.txt
+  tags:
+    - add_virtuser
+
+- name: set password for virtuser
+  shell: echo "{{ password }}" >> /etc/vsftpd/virtusers.txt
+  tags:
+    - add_virtuser
+
+- name: load db
+  shell: db_load -T -t hash -f /etc/vsftpd/virtusers.txt /etc/vsftpd/virtusers.db 
+  tags:
+    - install_vsftpd+add_virtuser
+    - add_virtuser
+
+- name: set vsftpd pam
+  copy:
+    src: vsftpd
+    dest: /etc/pam.d/vsftpd
+  tags:
+    - install_vsftpd+add_virtuser
+
+- name: add directory user_conf
+  file:
+    path: /etc/vsftpd/user_conf
+    state: directory
+  tags:
+    - install_vsftpd+add_virtuser
+
+- name: add virtuser conf
+  template:
+    src: name
+    dest: /etc/vsftpd/user_conf/{{ user }} 
+  tags:
+    - install_vsftpd+add_virtuser
+    - add_virtuser
+
+- name: create directory if it doesn't exist
+  file:
+    path: "{{ directory }}"
+    state: directory
+    mode: 0755
+  tags:
+    - install_vsftpd+add_virtuser
+    - add_virtuser
+
+- name: set directory mode
+  file:
+    path: "{{ directory }}"
+    owner: userftp
+    group: ftp
+    recurse: yes
+  tags:
+    - install_vsftpd+add_virtuser
+    - add_virtuser
+
+- name: restart vsftpd
+  service:
+    name: vsftpd
+    state: restarted
+    enabled: yes
+  tags:
+    - install_vsftpd+add_virtuser
+    - add_virtuser

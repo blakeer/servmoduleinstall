@@ -1,0 +1,6 @@
+yum_packages:
+  - readline-devel
+  - pcre-devel
+  - openssl-devel
+  - tcl
+  - perl

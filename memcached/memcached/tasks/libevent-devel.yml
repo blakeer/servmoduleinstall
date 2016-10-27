@@ -1,0 +1,14 @@
+- name: install libevent-devel copy
+  copy:
+    src: "{{ item }}"
+    dest: /usr/local/src/
+
+- name: install libevent-devel install
+  yum:
+    name: /usr/local/src/{{ item }}
+    state: installed
+
+- name: install libevent-devel absent rpm
+  file:
+    path: /usr/local/src/{{ item }}
+    state: absent

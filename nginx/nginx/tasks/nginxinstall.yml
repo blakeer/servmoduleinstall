@@ -1,0 +1,53 @@
+- name: create path webserver
+  file:
+    path: /data/webserver
+    state: directory
+
+- name: create path log nginx
+  file:
+    path: /data/log/nginx
+    state: directory
+
+- name: add group www
+  group:
+    name: www
+    state: present
+
+- name: add user www
+  user:
+    name: www
+    shell: /sbin/nologin
+    group: www
+
+- name: add group nginx
+  group:
+    name: nginx
+    state: present
+
+- name: add user nginx
+  user:
+    name: nginx
+    shell: /sbin/nologin
+    group: nginx
+
+- name: copy nginx file
+  unarchive:
+    src: nginx1.8.tar.gz
+    dest: /data/webserver/
+
+- name: copy test file
+  copy:
+    src: index.html
+    dest: /data/www/www.example.com/
+
+- name: link command nginx
+  file:
+    src: /data/webserver/nginx/sbin/nginx
+    dest: /usr/bin/nginx 
+    state: link
+
+- name: copy /etc/init.d/nginx
+  copy:
+    src: init.d.nginx
+    dest: /etc/init.d/nginx
+    mode: 0755

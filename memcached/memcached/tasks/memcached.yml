@@ -1,0 +1,10 @@
+- include: libevent-devel.yml
+  with_items:
+    - libevent-devel-1.4.13-4.el6.x86_64.rpm
+    - libevent-doc-1.4.13-4.el6.noarch.rpm
+    - libevent-headers-1.4.13-4.el6.noarch.rpm
+
+- name: copy memcached
+  unarchive:
+    src: memcached.tar.gz
+    dest: /usr/local/
