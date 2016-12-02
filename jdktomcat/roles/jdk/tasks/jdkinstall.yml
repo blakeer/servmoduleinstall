@@ -1,0 +1,19 @@
+- name: remove old
+  yum:
+    name: "{{ item }}"
+    state: absent
+  with_items:
+    - java-1.6.0-openjdk
+    - java-1.7.0-openjdk
+
+- name: copy jdk
+  unarchive:
+    src: "{{ jdk }}.tar.gz"
+    dest: /usr/local/
+
+- name: install jdk
+  file:
+    src: /usr/local/{{ jdk }}
+    dest: /usr/local/jdk
+    force: yes
+    state: link

@@ -1,0 +1,4 @@
+- name: copy development file
+  copy:
+    src: javaenv.sh
+    dest: /etc/profile.d/

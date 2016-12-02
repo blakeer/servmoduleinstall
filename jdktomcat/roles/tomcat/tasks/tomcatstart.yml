@@ -1,0 +1,6 @@
+- name: restart
+  service:
+    name: tomcat_{{ port }}
+    state: started
+  tags:
+    - start
