@@ -1,0 +1,69 @@
+- name: create directory webserver
+  file:
+    path: /data/webserver
+    state: directory
+
+- name: add user if not exist
+  user:
+    name: omadmin
+
+- name: create directory program www
+  file:
+    path: /data/{{ item }}
+    state: directory
+    owner: omadmin
+  with_items:
+    - program/{{ ServerName }}
+    - www/{{ ServerName }}
+    - log/{{ ServerName }}
+
+- name: authorized
+  authorized_key:
+    user: root
+    key: "{{ lookup('file', '/root/.ssh/id_rsa.pub') }}"
+
+- name: rsync tomcat
+  synchronize:
+    src: "{{ tomcat }}/"
+    dest: /data/webserver/{{ ServerName }}
+    delete: yes
+    recursive: yes
+
+- name: absent authorized
+  lineinfile:
+    dest: /root/.ssh/authorized_keys
+    state: absent
+    regexp: "root@ansible$"
+
+- name: copy test code
+  copy:
+    src: ROOT.war
+    dest: /data/program/{{ServerName}}/
+
+- name: Service |  update  |   link  code  >>>>
+  file:
+    src: /data/program/{{ServerName}}/ROOT.war
+    dest: /data/www/{{ServerName}}/ROOT.war
+    force: yes
+    state: link
+
+- name: template configure
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: omadmin
+  with_items:
+    - { src: '{{ tomcat }}_server.xml.j2', dest: '/data/webserver/{{ ServerName }}/conf/server.xml' }
+    - { src: 'setenv.sh.j2', dest: '/data/webserver/{{ ServerName }}/bin/setenv.sh' }
+    - { src: '{{ tomcat }}_logging.properties.j2', dest: '/data/webserver/{{ ServerName }}/conf/logging.properties' }
+
+- name: template init
+  template:
+    src: init.j2
+    dest: /etc/init.d/tomcat_{{ port }}
+    mode: 0700
+
+- name: template logrotate
+  template:
+    src: tomcat.j2
+    dest: /etc/logrotate.d/tomcat_{{ ServerName }}

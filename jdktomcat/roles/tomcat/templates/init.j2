@@ -1,0 +1,131 @@
+#!/bin/sh
+#
+# chkconfig: - 80 20
+# description: NFS is a popular protocol for file sharing across networks.
+#              This service provides NFS server functionality, which is \
+#              configured via the /etc/exports file.
+# probe: true
+
+
+## Source function library.
+. /etc/rc.d/init.d/functions
+Name_Tomcat={{ ServerName }}
+U=omadmin
+
+chown $U:$U /data/www/$Name_Tomcat -R
+chown $U:$U /data/program/$Name_Tomcat -R
+chown $U:$U /data/log/$Name_Tomcat -R
+chown $U:$U /data/webserver/$Name_Tomcat -R
+
+/bin/rm /data/www/$Name_Tomcat/ROOT -rf
+
+export CATALINA_OUT="/data/log/$Name_Tomcat/catalina.out"
+export CATALINA_TMPDIR="/data/log/$Name_Tomcat/"
+export JAVA_HOME="/usr/local/jdk"
+export CLASS_PATH="$JAVA_HOME/lib:$JAVA_HOME/jre/lib"
+export PATH="/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/root/bin"
+export PATH=".:$PATH:$JAVA_HOME/bin"
+export JRE_HOME="/usr/local/jdk/jre"
+export CATALINA_HOME="/data/webserver/$Name_Tomcat"
+export JAVA_HOME CATALINA_HOME
+
+## Variables
+SHUTDOWN_WAIT=5
+RETVAL=0
+PROG=$Name_Tomcat
+
+tomcat_pid() {
+  #echo `ps aux | grep org.apache.catalina.startup.Bootstrap | grep -v grep | awk '{ print $2 }'`
+  echo `ps aux | grep "/data/webserver/$Name_Tomcat" | grep -v grep | awk '{ print $2 }'`
+}
+
+start() {
+  pid=$(tomcat_pid)
+  if [ -n "$pid" ]
+  then
+    echo "$PROG is already running (pid: $pid)"
+    RETVAL=0
+  else
+    echo -n $"Starting $PROG: "
+
+    umask 007
+  if [ `whoami` = "omadmin" ];then
+    $CATALINA_HOME/bin/startup.sh > /dev/null
+  else
+    su $U $CATALINA_HOME/bin/startup.sh > /dev/null
+  fi
+
+    # Check pid exist
+    pid=$(tomcat_pid)
+    if [ -n "$pid" ];then
+      success
+      RETVAL=0
+    else
+      failure
+      RETVAL=1
+    fi
+  echo
+  fi
+  return $RETVAL
+}
+
+stop() {
+  pid=$(tomcat_pid)
+  if [ -n "$pid" ];then
+    echo -n $"Stopping $PROG: "
+    #su $U $CATALINA_HOME/bin/shutdown.sh > /dev/null
+    kill -9 $pid
+    let kwait=$SHUTDOWN_WAIT
+    count=0;
+    until [ `ps -p $pid | grep -c $pid` = '0' ] || [ $count -gt $kwait ]
+    do
+      echo -n ".";
+      sleep 1
+      let count=$count+1;
+    done
+    if [ $count -gt $kwait ]
+    then
+      failure
+      echo
+      echo -n "Force killing $PROG which didn't stop after $SHUTDOWN_WAIT seconds"
+      kill -9 $pid
+    fi
+
+    success
+    echo
+  else
+    echo "$PROG is not running"
+  fi
+  return 0
+}
+
+case $1 in
+start)
+  start
+;;
+
+stop)
+  stop
+;;
+
+restart)
+  stop
+  start
+;;
+
+status)
+  pid=$(tomcat_pid)
+  if [ -n "$pid" ]
+  then
+    echo "$PROG is running with pid: $pid"
+  else
+    echo "$PROG is not running"
+    RETVAL=1
+  fi
+;;
+
+*)
+  echo "Usage: {start|stop|restart|status}"
+  RETVAL=1
+esac
+exit $RETVAL

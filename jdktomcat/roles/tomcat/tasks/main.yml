@@ -1,0 +1,3 @@
+- include: tomcatinstall.yml
+- include: tomcatstart.yml
+
