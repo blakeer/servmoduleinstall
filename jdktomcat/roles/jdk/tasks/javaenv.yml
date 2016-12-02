@@ -1,7 +1,0 @@
-- name: copy development file
-  template:
-    src: development.sh.j2
-    dest: /etc/profile.d/development.sh
-
-- name: source environment
-  shell: source /etc/profile.d/development.sh

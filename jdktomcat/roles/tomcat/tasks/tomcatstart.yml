@@ -1,2 +1,0 @@
-- name: start tomcat
-  command: nohup /data/webserver/"{{ServerName}}"/bin/startup.sh &
